@@ -1,0 +1,374 @@
+@import "tailwindcss";
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
+/* ─────────────────────────────────────────────────────────
+   DESIGN TOKENS — "Cyber-Editorial / Neural Lab"
+   Cyan  = inference / active state (retrieved, live, focused)
+   Violet = depth (glows, gradients, ambient)
+   ───────────────────────────────────────────────────────── */
+:root {
+  --void: #050507;
+  --obsidian: #0b0d12;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --cyan: #00f0ff;
+  --violet: #7c3aed;
+  --text: #f4f4f6;
+  --muted: #8e92a4;
+  --faint: #80859a;
+  --violet-soft: #a78bfa;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --nav-h: 72px;
+}
+
+@theme inline {
+  --color-void: var(--void);
+  --color-obsidian: var(--obsidian);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --color-violet-soft: var(--violet-soft);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+
+  --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --text-display: clamp(2.75rem, 7.2vw, 7rem);
+  --text-display--line-height: 0.95;
+  --text-display--letter-spacing: -0.035em;
+  --text-h2: clamp(2rem, 4vw, 3.5rem);
+  --text-h2--line-height: 1.05;
+  --text-h2--letter-spacing: -0.03em;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.1em;
+}
+
+/* ── Base ─────────────────────────────────────────────── */
+html {
+  background: var(--void);
+  color: var(--text);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+
+::selection {
+  background: rgba(0, 240, 255, 0.25);
+  color: var(--text);
+}
+
+/* In a layer so component utilities (e.g. focus-visible:outline-none) can override it */
+@layer base {
+  :focus-visible {
+    outline: 1px solid var(--cyan);
+    outline-offset: 3px;
+  }
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Custom cursor: native cursor hidden only once JS confirms a fine pointer */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+html.has-custom-cursor input,
+html.has-custom-cursor textarea {
+  cursor: text !important;
+}
+
+/* ── Utilities ────────────────────────────────────────── */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@utility glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* Frosted variant: only where something actually moves behind the panel
+   (hero HUD/ID card). backdrop-filter is expensive, so it's opt-in. */
+@utility glass-blur {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* Skip style/layout/paint for off-screen sections until they approach the viewport. */
+@utility cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1100px;
+}
+
+@utility container-lab {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+/* Dot-matrix grid that fades toward edges */
+@utility dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 100%);
+}
+
+@utility text-gradient {
+  background: linear-gradient(100deg, var(--text) 20%, var(--cyan) 60%, var(--violet) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Spotlight card: reads --mx/--my set by <Spotlight> */
+@utility spotlight {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+    opacity: var(--spot-o, 0);
+    transition: opacity 0.4s var(--ease-out);
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(0, 240, 255, 0.09),
+      rgba(124, 58, 237, 0.05) 40%,
+      transparent 70%
+    );
+  }
+  &::after {
+    /* border glow */
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    padding: 1px;
+    opacity: var(--spot-o, 0);
+    transition: opacity 0.4s var(--ease-out);
+    background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(0, 240, 255, 0.55),
+      transparent 70%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
+
+/* ── Marquee ──────────────────────────────────────────── */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s var(--ease-out) infinite;
+}
+
+/* ── Reduced motion: kill decorative motion globally ──── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Range slider (Lab controls) ──────────────────────── */
+.lab-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  background: transparent;
+}
+.lab-range::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--cyan) var(--pct, 50%), var(--border-strong) var(--pct, 50%));
+}
+.lab-range::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--cyan) var(--pct, 50%), var(--border-strong) var(--pct, 50%));
+}
+.lab-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -7px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--void);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.55);
+  transition: transform 0.2s var(--ease-out);
+}
+.lab-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--void);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.55);
+}
+.lab-range:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+.lab-range:focus-visible {
+  outline: none;
+}
+.lab-range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* ── Entrance animations (CSS, run before hydration → fast LCP) ── */
+@keyframes word-rise {
+  from {
+    transform: translate3d(0, 110%, 0) rotate(4deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-word {
+  display: inline-block;
+  animation: word-rise 1s var(--ease-out) both;
+  animation-delay: var(--d, 0s);
+}
+.animate-rise {
+  animation: rise 0.9s var(--ease-out) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes slide-up {
+  from {
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+.animate-slide {
+  animation: slide-up 0.9s var(--ease-out) both;
+  animation-delay: var(--d, 0s);
+}
+.animate-fade {
+  animation: fade-in 1.6s var(--ease-out) both;
+  animation-delay: var(--d, 0s);
+}
+
+/* Scroll reveal (see components/ui/Reveal.tsx) */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--y, 28px), 0);
+  transition:
+    opacity 0.9s var(--ease-out) var(--d, 0s),
+    transform 0.9s var(--ease-out) var(--d, 0s);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes scroll-cue {
+  from {
+    transform: translate3d(0, -100%, 0);
+  }
+  to {
+    transform: translate3d(0, 200%, 0);
+  }
+}
+.animate-scroll-cue {
+  animation: scroll-cue 1.8s var(--ease-out) infinite;
+}
